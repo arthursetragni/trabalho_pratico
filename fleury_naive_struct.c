@@ -2,6 +2,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+
+
 // Declaração das estruturas de dados
 //==========================================================================================
 typedef struct No
@@ -24,6 +26,7 @@ typedef struct Grafo
     Lista **adj;
 } Grafo;
 
+Grafo *grafo;
 //==========================================================================================
 
 // Funções para criar as estruturas de dados
@@ -84,9 +87,54 @@ void adicionaAresta(int v, int w, Grafo *grafo)
     adicionarNo(w, grafo->adj[v]);
 }
 
+void desconectaVertices(int start, int v) {
+    if (start < 0 || start >= grafo->vertices || v < 0 || v >= grafo->vertices) {
+        return;
+    }
+
+    No *no = grafo->adj[start]->cabeca;
+    No *prev = NULL;
+    while (no != NULL) {
+        if (no->valor == v) {
+            if (prev == NULL) {
+                grafo->adj[start]->cabeca = no->prox;
+            } else {
+                prev->prox = no->prox;
+            }
+            if (no->prox != NULL) {
+                no->prox->ant = prev;
+            }
+            free(no);
+            break;
+        }
+        prev = no;
+        no = no->prox;
+    }
+
+    no = grafo->adj[v]->cabeca;
+    prev = NULL;
+    while (no != NULL) {
+        if (no->valor == start) {
+            if (prev == NULL) {
+                grafo->adj[v]->cabeca = no->prox;
+            } else {
+                prev->prox = no->prox;
+            }
+            if (no->prox != NULL) {
+                no->prox->ant = prev;
+            }
+            free(no);
+            break;
+        }
+        prev = no;
+        no = no->prox;
+    }
+}
+
+
 //==========================================================================================
 
-Grafo *grafo;
+
 
 
 int encontraInicial() {
@@ -120,7 +168,7 @@ int ehPonte(int vertice){
     return 1;
 }
 
-int contaArestas(Grafo *grafo) {
+int contaArestas() {
     int count = 0;
     
     for (int i = 0; i < grafo->vertices; i++) {
@@ -132,7 +180,7 @@ int contaArestas(Grafo *grafo) {
         }
     }
     
-    return count;
+    return count / 2;
 }
 
 int estaConectado(int start, int v) {
@@ -158,10 +206,42 @@ void fleury(int start, int edge) {
         if (estaConectado(start, v)){
             if (edge <= 1 || !ehPonte(v)) {
                 printf("%d--%d ", start, v);
-                tempgrafo[start][v] = tempgrafo[v][start] = 0;
+                desconectaVertices(start, v);
                 edge--;
                 fleury(v, edge);
             }
         }
     }
+}
+
+
+int main()
+{
+    // Grafo teste mostrado no documento
+
+    grafo = novoGrafo(10000);
+    // adicionaAresta(0, 1, grafo);
+    // adicionaAresta(1, 2, grafo);
+    // adicionaAresta(2, 3, grafo);
+    // adicionaAresta(1, 3, grafo);
+    // adicionaAresta(0, 3, grafo);
+    // adicionaAresta(0, 4, grafo);
+    // adicionaAresta(1, 4, grafo);
+    // adicionaAresta(2, 4, grafo);
+    // adicionaAresta(2, 5, grafo);
+    // adicionaAresta(3, 5, grafo);
+    // adicionaAresta(4, 5, grafo);
+    // adicionaAresta(5, 6, grafo);
+    // adicionaAresta(6, 7, grafo);
+    // adicionaAresta(6, 8, grafo);
+    // adicionaAresta(7, 8, grafo);
+    for (int i = 0; i < grafo->vertices - 1; i++) {
+        adicionaAresta(i, i + 1, grafo);
+    }
+    adicionaAresta(grafo->vertices - 1, 0, grafo);
+
+    printf("Caminho ou ciclo eulriano: ");
+    fleury(encontraInicial(), contaArestas());
+
+    return 0;
 }
