@@ -5,6 +5,7 @@
 
 
 
+
 // Declaração das estruturas de dados
 //==========================================================================================
 typedef struct No
@@ -179,6 +180,24 @@ void desconectaVertices(int start, int v) {
     }
 }
 
+int contaGrau(int vertice) {
+    int grau = 0;
+
+    if (vertice < 0 || vertice >= grafo->vertices) {
+        printf("Vértice inválido.\n");
+        return -1;  
+    }
+
+    No *no = grafo->adj[vertice]->cabeca;
+    
+    while (no != NULL) {
+        grau++;     
+        no = no->prox; 
+    }
+
+    return grau;
+}
+
 
 //==========================================================================================
 
@@ -202,18 +221,89 @@ int encontraInicial() {
     return 0;
 }
 
-int ehPonte(int vertice){
-    int grau = 0;
-    No *no = grafo->adj[vertice]->cabeca;
+void dfsVisitado(int vertice, bool *visitado) {
+    visitado[vertice] = true;
     
+    No *no = grafo->adj[vertice]->cabeca;
     while (no != NULL) {
-        grau++;
+        int v = no->valor;
+        if (!visitado[v]) {
+            dfsVisitado(v, visitado);
+        }
         no = no->prox;
     }
-    if (grau > 1) {
-        return 0;
+}
+
+void desconectaAresta(int u, int v) {
+    No *anterior = NULL;
+    No *atual = grafo->adj[u]->cabeca;
+    
+    while (atual != NULL && atual->valor != v) {
+        anterior = atual;
+        atual = atual->prox;
     }
-    return 1;
+    
+    if (atual != NULL) {
+        if (anterior == NULL) {
+            grafo->adj[u]->cabeca = atual->prox;
+        } else {
+            anterior->prox = atual->prox;
+        }
+        free(atual);
+    }
+
+    anterior = NULL;
+    atual = grafo->adj[v]->cabeca;
+    
+    while (atual != NULL && atual->valor != u) {
+        anterior = atual;
+        atual = atual->prox;
+    }
+    
+    if (atual != NULL) {
+        if (anterior == NULL) {
+            grafo->adj[v]->cabeca = atual->prox;
+        } else {
+            anterior->prox = atual->prox;
+        }
+        free(atual);
+    }
+}
+
+
+int ehPonte(int u, int v) {
+   
+    bool *visitado = (bool *)malloc(grafo->vertices * sizeof(bool));
+    for (int i = 0; i < grafo->vertices; i++) {
+        visitado[i] = false;
+    }
+
+    
+    desconectaAresta(u, v);
+
+    
+    dfsVisitado(u, visitado);
+
+    
+    bool ehConexo = true;
+    for (int i = 0; i < grafo->vertices; i++) {
+        if (!visitado[i]) {
+            ehConexo = false;
+            break;
+        }
+    }
+
+    No *novoNoU = novoNo(v);
+    novoNoU->prox = grafo->adj[u]->cabeca;
+    grafo->adj[u]->cabeca = novoNoU;
+    
+    No *novoNoV = novoNo(u);
+    novoNoV->prox = grafo->adj[v]->cabeca;
+    grafo->adj[v]->cabeca = novoNoV;
+
+    free(visitado);
+
+    return !ehConexo;
 }
 
 int contaArestas() {
@@ -252,8 +342,8 @@ int estaConectado(int start, int v) {
 void fleury(int start, int edge) {
     for (int v = 0; v < grafo->vertices; v++) {
         if (estaConectado(start, v)){
-            if (edge <= 1 || !ehPonte(v)) {
-                //printf("%d--%d ", start, v);
+            if (contaGrau(start) <= 1 || !ehPonte(start, v)) {
+                printf("%d--%d ", start, v);
                 desconectaVertices(start, v);
                 edge--;
                 fleury(v, edge);
@@ -265,15 +355,18 @@ void fleury(int start, int edge) {
 
 int main()
 {
-    int vertices[] = {100, 1000, 10000, 100000};
-    int n_vertices = 4;
+    int vertices[] = {111};
+    int n_vertices = 1;
     for(int i = 0; i < n_vertices; i++){
         grafo = novoGrafo(vertices[i]);
     
-        for (int i = 0; i < grafo->vertices - 1; i++) {
-            adicionaAresta(i, i + 1, grafo);
+        for(int j = 0; j < grafo->vertices; j++){
+            for(int k = 0; k < grafo->vertices;k++){
+                if(k != j && j < k) adicionaAresta(j, k, grafo);
+            }
+            printf("%d\n", j);
         }
-        adicionaAresta(grafo->vertices - 1, 0, grafo);
+        
 
         clock_t start_time, end_time;
         double total_time;

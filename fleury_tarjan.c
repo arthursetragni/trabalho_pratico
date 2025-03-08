@@ -361,7 +361,7 @@ void fleury(Grafo *grafo, int start, int edge)
         {
             if (grafo->adj[start]->grau == 1 || !pontes(grafo, start, v))
             {
-                //printf("%d--%d ", start, v);
+                printf("%d--%d ", start, v);
                 desconectaVertices(grafo, start, v);
                 edge--;
                 fleury(grafo, v, edge);
@@ -389,15 +389,17 @@ int contaArestas(Grafo *grafo)
 
 int main()
 {
-    int vertices[] = {100, 1000, 10000, 100000};
-    int n_vertices = 4;
+    int vertices[] = {3333};
+    int n_vertices = 1;
     for(int i = 0; i < n_vertices; i++){
         Grafo *grafo = novoGrafo(vertices[i]);
     
-        for (int i = 0; i < grafo->vertices - 1; i++) {
-            adicionaAresta(i, i + 1, grafo);
+        for(int j = 0; j < grafo->vertices; j++){
+            for(int k = 0; k < grafo->vertices;k++){
+                if(k != j && j < k) adicionaAresta(j, k, grafo);
+            }
+            printf("%d\n", j);
         }
-        adicionaAresta(grafo->vertices - 1, 0, grafo);
 
         if (!podeSerEuleriano(grafo) || !estaConexo(grafo))
         {
