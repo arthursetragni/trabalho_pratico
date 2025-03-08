@@ -1,7 +1,21 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
-
+ // adicionaAresta(0, 1, grafo);
+    // adicionaAresta(1, 2, grafo);
+    // adicionaAresta(2, 3, grafo);
+    // adicionaAresta(1, 3, grafo);
+    // adicionaAresta(0, 3, grafo);
+    // adicionaAresta(0, 4, grafo);
+    // adicionaAresta(1, 4, grafo);
+    // adicionaAresta(2, 4, grafo);
+    // adicionaAresta(2, 5, grafo);
+    // adicionaAresta(3, 5, grafo);
+    // adicionaAresta(4, 5, grafo);
+    // adicionaAresta(5, 6, grafo);
+    // adicionaAresta(6, 7, grafo);
+    // adicionaAresta(6, 8, grafo);
+    // adicionaAresta(7, 8, grafo);
 // Declaração das estruturas de dados
 //==========================================================================================
 typedef struct No

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <time.h>
 
 
 
@@ -59,6 +60,53 @@ Grafo *novoGrafo(int vertices)
         novo->adj[i] = novaLista();
     }
     return novo;
+}
+
+
+void liberaNo(No *no)
+{
+    if (no != NULL)
+    {
+        free(no);
+    }
+}
+
+void liberaLista(Lista *lista)
+{
+    if (lista != NULL)
+    {
+        No *atual = lista->cabeca;
+        No *temp;
+        
+        // Liberando os nós da lista
+        while (atual != NULL)
+        {
+            temp = atual;
+            atual = atual->prox;
+            liberaNo(temp);
+        }
+
+        // Liberando a lista em si
+        free(lista);
+    }
+}
+
+void liberaGrafo(Grafo *grafo)
+{
+    if (grafo != NULL)
+    {
+        // Liberando as listas de adjacência
+        for (int i = 0; i < grafo->vertices; i++)
+        {
+            liberaLista(grafo->adj[i]);
+        }
+
+        // Liberando o array de listas de adjacência
+        free(grafo->adj);
+
+        // Liberando o grafo
+        free(grafo);
+    }
 }
 
 //==========================================================================================
@@ -205,7 +253,7 @@ void fleury(int start, int edge) {
     for (int v = 0; v < grafo->vertices; v++) {
         if (estaConectado(start, v)){
             if (edge <= 1 || !ehPonte(v)) {
-                printf("%d--%d ", start, v);
+                //printf("%d--%d ", start, v);
                 desconectaVertices(start, v);
                 edge--;
                 fleury(v, edge);
@@ -217,31 +265,31 @@ void fleury(int start, int edge) {
 
 int main()
 {
-    // Grafo teste mostrado no documento
+    int vertices[] = {100, 1000, 10000, 100000};
+    int n_vertices = 4;
+    for(int i = 0; i < n_vertices; i++){
+        grafo = novoGrafo(vertices[i]);
+    
+        for (int i = 0; i < grafo->vertices - 1; i++) {
+            adicionaAresta(i, i + 1, grafo);
+        }
+        adicionaAresta(grafo->vertices - 1, 0, grafo);
 
-    grafo = novoGrafo(10000);
-    // adicionaAresta(0, 1, grafo);
-    // adicionaAresta(1, 2, grafo);
-    // adicionaAresta(2, 3, grafo);
-    // adicionaAresta(1, 3, grafo);
-    // adicionaAresta(0, 3, grafo);
-    // adicionaAresta(0, 4, grafo);
-    // adicionaAresta(1, 4, grafo);
-    // adicionaAresta(2, 4, grafo);
-    // adicionaAresta(2, 5, grafo);
-    // adicionaAresta(3, 5, grafo);
-    // adicionaAresta(4, 5, grafo);
-    // adicionaAresta(5, 6, grafo);
-    // adicionaAresta(6, 7, grafo);
-    // adicionaAresta(6, 8, grafo);
-    // adicionaAresta(7, 8, grafo);
-    for (int i = 0; i < grafo->vertices - 1; i++) {
-        adicionaAresta(i, i + 1, grafo);
+        clock_t start_time, end_time;
+        double total_time;
+
+        //printf("Caminho ou ciclo eulriano: ");
+
+        start_time = clock();
+
+        fleury(encontraInicial(), contaArestas());
+
+        end_time = clock();
+
+        total_time = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
+
+        printf("\nTempo de execucao da funcao Fleury com %d vertices: %.6f segundos\n", vertices[i], total_time);
+        liberaGrafo(grafo);
     }
-    adicionaAresta(grafo->vertices - 1, 0, grafo);
-
-    printf("Caminho ou ciclo eulriano: ");
-    fleury(encontraInicial(), contaArestas());
-
     return 0;
 }
