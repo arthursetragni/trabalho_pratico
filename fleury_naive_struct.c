@@ -114,6 +114,24 @@ void liberaGrafo(Grafo *grafo)
 
 // Funções para adição de arestas e nós
 
+int contaGrau(int vertice) {
+    int grau = 0;
+
+    if (vertice < 0 || vertice >= grafo->vertices) {
+        printf("Vértice inválido.\n");
+        return -1;  
+    }
+
+    No *no = grafo->adj[vertice]->cabeca;
+    
+    while (no != NULL) {
+        grau++;     
+        no = no->prox; 
+    }
+
+    return grau;
+}
+
 void adicionarNo(int valor, Lista *lista)
 {
     No *novo = novoNo(valor);
@@ -136,7 +154,7 @@ void adicionaAresta(int v, int w, Grafo *grafo)
     adicionarNo(w, grafo->adj[v]);
 }
 
-void desconectaVertices(int start, int v) {
+void desconectaVertices(int start, int v, int *ignorados) {
     if (start < 0 || start >= grafo->vertices || v < 0 || v >= grafo->vertices) {
         return;
     }
@@ -178,25 +196,15 @@ void desconectaVertices(int start, int v) {
         prev = no;
         no = no->prox;
     }
+    if (contaGrau(start) == 0) {
+        ignorados[start] = 1;
+    }
+    if (contaGrau(v) == 0) {
+        ignorados[v] = 1;
+    }
 }
 
-int contaGrau(int vertice) {
-    int grau = 0;
 
-    if (vertice < 0 || vertice >= grafo->vertices) {
-        printf("Vértice inválido.\n");
-        return -1;  
-    }
-
-    No *no = grafo->adj[vertice]->cabeca;
-    
-    while (no != NULL) {
-        grau++;     
-        no = no->prox; 
-    }
-
-    return grau;
-}
 
 
 //==========================================================================================
@@ -271,12 +279,16 @@ void desconectaAresta(int u, int v) {
 }
 
 
-int ehPonte(int u, int v) {
+int ehPonte(int u, int v, int *ignorados) {
    
     bool *visitado = (bool *)malloc(grafo->vertices * sizeof(bool));
     for (int i = 0; i < grafo->vertices; i++) {
         visitado[i] = false;
+        if(ignorados[i] == 1) visitado[i] = true;
     }
+
+    
+
 
     
     desconectaAresta(u, v);
@@ -342,9 +354,9 @@ int estaConectado(int start, int v) {
 void fleury(int start, int edge, int *ignorados) {
     for (int v = 0; v < grafo->vertices; v++) {
         if (estaConectado(start, v)){
-            if (contaGrau(start) <= 1 || !ehPonte(start, v)) {
+            if (contaGrau(start) <= 1 || !ehPonte(start, v, ignorados)) {
                 printf("%d--%d ", start, v);
-                desconectaVertices(start, v);
+                desconectaVertices(start, v, ignorados);
                 edge--;
                 fleury(v, edge, ignorados);
             }
