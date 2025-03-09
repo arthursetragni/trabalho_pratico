@@ -13,7 +13,7 @@ typedef struct No
     struct No *prox;
     struct No *ant;
     int valor;
-} No;
+} No; 
 
 typedef struct Lista
 {
@@ -339,14 +339,14 @@ int estaConectado(int start, int v) {
     return 0;
 }
 
-void fleury(int start, int edge) {
+void fleury(int start, int edge, int *ignorados) {
     for (int v = 0; v < grafo->vertices; v++) {
         if (estaConectado(start, v)){
             if (contaGrau(start) <= 1 || !ehPonte(start, v)) {
                 printf("%d--%d ", start, v);
                 desconectaVertices(start, v);
                 edge--;
-                fleury(v, edge);
+                fleury(v, edge, ignorados);
             }
         }
     }
@@ -359,7 +359,8 @@ int main()
     int n_vertices = 1;
     for(int i = 0; i < n_vertices; i++){
         grafo = novoGrafo(vertices[i]);
-    
+        
+
         for(int j = 0; j < grafo->vertices; j++){
             for(int k = 0; k < grafo->vertices;k++){
                 if(k != j && j < k) adicionaAresta(j, k, grafo);
@@ -372,10 +373,11 @@ int main()
         double total_time;
 
         //printf("Caminho ou ciclo eulriano: ");
+        int *ignorados = calloc(vertices[i], sizeof(int));
 
         start_time = clock();
 
-        fleury(encontraInicial(), contaArestas());
+        fleury(encontraInicial(), contaArestas(), ignorados);
 
         end_time = clock();
 

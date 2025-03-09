@@ -389,7 +389,7 @@ int contaArestas(Grafo *grafo)
 
 int main()
 {
-    int vertices[] = {3333};
+    int vertices[] = {111};
     int n_vertices = 1;
     for(int i = 0; i < n_vertices; i++){
         Grafo *grafo = novoGrafo(vertices[i]);
